@@ -101,3 +101,17 @@ export function ApiCreate() {
     ApiBody({ type: CreateProductDto }),
   );
 }
+
+export function ApiFindIndicatorInfo() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Devuelve información sobre el stock y las ventas totales',
+    }),
+    ApiResponse({
+      status: 200,
+      description: 'Información devuelta con éxito',
+      type: ResponseDto,
+    }),
+    ApiResponse({ status: 500, description: 'Error del servidor' }),
+  );
+}

@@ -10,13 +10,12 @@ import { DUMMY_PRODUCTS } from '@constants/dummy-products.constants';
       provide: 'AEROSPIKE_CLIENT',
       useFactory: async () => {
         const client = Aerospike.client({
-          hosts: '127.0.0.1:3000',
+          hosts: process.env.AEROSPIKE_DB_HOST || '127.0.0.1:3000',
         });
         await client
           .connect()
           .then(async () => {
             Logger.log('✅ Conectado a Aerospike!', 'AerospikeModule');
-            await createIndexes(client);
             await seedData(client);
           })
           .catch((error) => {
@@ -35,34 +34,6 @@ import { DUMMY_PRODUCTS } from '@constants/dummy-products.constants';
   exports: ['AEROSPIKE_CLIENT', AerospikeService],
 })
 export class AerospikeModule {}
-
-// 🔥 Función para crear índices automáticamente al conectar
-async function createIndexes(client: Aerospike.Client) {
-  try {
-    client.createIndex({
-      ns: 'test', // namespace
-      set: 'products', // set
-      bin: 'name', // Campo a indexar
-      index: 'idx_products_name', // Nombre del índice
-      datatype: Aerospike.indexDataType.STRING,
-    });
-
-    Logger.log(
-      '✅ Índice idx_users_email creado exitosamente',
-      'AerospikeModule',
-    );
-  } catch (error) {
-    if (error.code === Aerospike.status.ERR_INDEX_FOUND) {
-      Logger.warn('⚠️ El índice idx_users_email ya existe', 'AerospikeModule');
-    } else {
-      Logger.error(
-        '❌ Error al crear el índice',
-        error.stack,
-        'AerospikeModule',
-      );
-    }
-  }
-}
 
 // 🔥 Función para insertar productos de ejemplo al arrancar
 async function seedData(client: Aerospike.Client) {

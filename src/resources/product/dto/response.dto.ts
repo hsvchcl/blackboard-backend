@@ -23,5 +23,5 @@ export class ResponseDto {
     description:
       'Retorna objeto o arreglo con informacion relevante de la consulta',
   })
-  data?: [];
+  data?: [] | {};
 }

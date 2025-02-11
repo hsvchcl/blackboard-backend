@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsPositive, IsString, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import {
+  IsInt,
+  IsOptional,
+  IsPositive,
+  IsString,
+  MinLength,
+} from 'class-validator';
 
 export class CreateProductDto {
   @IsInt()
@@ -22,7 +29,7 @@ export class CreateProductDto {
   stock: number;
 
   @IsString()
-  @MinLength(3, { message: 'La categoría debe tener al menos 3 caracteres' })
+  @IsOptional()
   @ApiProperty({ example: 'Electro', description: 'Categoría del producto' })
   category: string;
 

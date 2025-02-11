@@ -1,6 +1,12 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsInt,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class GetProductDto {
   @IsOptional()
@@ -9,23 +15,43 @@ export class GetProductDto {
 
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional({ example: 'producto 1', description: 'Nombre del producto a buscar' })
+  @ApiPropertyOptional({
+    example: 'producto 1',
+    description: 'Nombre del producto a buscar',
+  })
   name: string;
 
   @IsOptional()
-  @Transform(({ value }) => parseInt(value, 0))
-  @IsInt()
-  @ApiPropertyOptional({ example: 1990, description: 'Precio del producto a buscar' })
-  price: number;
+  @IsArray()
+  @ArrayMinSize(2)
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value.map((v) => parseInt(v, 10)) : [],
+  )
+  @IsInt({ each: true })
+  @ApiPropertyOptional({
+    example: [0, 1990],
+    description: 'Rango de precios del producto a buscar [min, max]',
+  })
+  priceRange: number[];
 
   @IsOptional()
-  @Transform(({ value }) => parseInt(value, 0))
-  @IsInt()
-  @ApiPropertyOptional({ example: 19, description: 'Stock del producto a buscar' })
-  stock: number;
+  @IsArray()
+  @ArrayMinSize(2)
+  @Transform(({ value }) =>
+    Array.isArray(value) ? value.map((v) => parseInt(v, 10)) : [],
+  )
+  @IsInt({ each: true })
+  @ApiPropertyOptional({
+    example: [0, 19],
+    description: 'Rango de stock del producto a buscar [min, max]',
+  })
+  stockRange: number[];
 
   @IsOptional()
   @IsString()
-  @ApiPropertyOptional({ example: 'Electro', description: 'Categoría del producto a buscar' })
+  @ApiPropertyOptional({
+    example: 'Electro',
+    description: 'Categoría del producto a buscar',
+  })
   category: string;
 }

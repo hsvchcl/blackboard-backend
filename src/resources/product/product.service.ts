@@ -50,6 +50,40 @@ export class ProductService {
     }
   }
 
+  async findIndicatorInfo() {
+    this.logger.log('Buscando datos en Aerospike');
+    try {
+      const data = await this.aerospikeService.getAllData();
+
+      const totalStock = data.data.reduce(
+        (acc, product) => acc + product.stock,
+        0,
+      );
+      const totalSales = data.data.reduce(
+        (acc, product) => acc + product.sales * product.price,
+        0,
+      );
+
+      const productWithMaxSales = data.data.reduce((prev, current) =>
+        prev.sales > current.sales ? prev : current,
+      );
+
+      this.logger.log('Búsqueda finalizada.');
+      return {
+        success: true,
+        message: 'Datos encontrados en Aerospike',
+        data: {
+          totalSales,
+          totalStock,
+          productWithMaxSales: productWithMaxSales.name,
+        },
+      };
+    } catch (error) {
+      this.logger.error(error);
+      return 'Error al obtener los datos';
+    }
+  }
+
   update(id: number, updateProductDto: UpdateProductDto) {
     this.logger.log('Actualizando datos en Aerospike');
     try {

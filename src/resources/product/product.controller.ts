@@ -15,6 +15,7 @@ import {
   ApiCreate,
   ApiDelete,
   ApiFindAll,
+  ApiFindIndicatorInfo,
   ApiFindWithQuery,
   ApiUpdate,
 } from '@swagger';
@@ -44,6 +45,13 @@ export class ProductController {
   @ApiFindAll()
   findAll() {
     return this.productService.findAll();
+  }
+
+  @Get('indicator-info')
+  @Version('1')
+  @ApiFindIndicatorInfo()
+  findIndicatorInfo() {
+    return this.productService.findIndicatorInfo();
   }
 
   @Get()

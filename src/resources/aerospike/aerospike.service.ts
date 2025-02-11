@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { CreateProductDto } from '@resources/product/dto/create-product.dto';
 import { GetProductDto } from '@resources/product/dto/get-product.dto';
+import { ResponseFormat } from '@resources/product/interfaces/response-format.interface';
 import * as Aerospike from 'aerospike';
 
 @Injectable()
@@ -65,7 +66,7 @@ export class AerospikeService implements OnModuleDestroy {
     }
   }
 
-  async getAllData() {
+  async getAllData(): Promise<ResponseFormat> {
     this.logger.log('Buscando todos los datos en Aerospike');
     try {
       const query = this.client.query('test', 'products');
@@ -100,53 +101,50 @@ export class AerospikeService implements OnModuleDestroy {
         2,
       )}`,
     );
+
     try {
-      const productos = [];
+      const productos = new Map(); // Usamos un Map para evitar duplicados basados en "id"
+
       return new Promise((resolve, reject) => {
         const scan = this.client.scan('test', 'products');
-
         const stream = scan.foreach();
 
         stream.on('data', (record) => {
-          // Filtrar manualmente los productos que contengan el texto
-          if (queryDto.name) {
-            if (
-              record.bins.name
-                .toString()
-                .toLocaleLowerCase()
-                .includes(queryDto.name.toLowerCase())
-            ) {
-              productos.push(record.bins);
-            }
-          }
+          const producto = record.bins;
 
-          // Filtrar por precio:
-          if (queryDto.price) {
-            if (record.bins.price === queryDto.price) {
-              productos.push(record.bins);
-            }
-          }
+          // Aplicar los filtros
+          const cumpleFiltros =
+            (!queryDto.name ||
+              producto.name
+                ?.toString()
+                .toLowerCase()
+                .includes(queryDto.name.toLowerCase())) &&
+            (!queryDto.priceRange ||
+              (typeof producto.price === 'number' &&
+                producto.price >= queryDto.priceRange[0] &&
+                producto.price <= queryDto.priceRange[1])) &&
+            (!queryDto.stockRange ||
+              (typeof producto.stock === 'number' &&
+                producto.stock >= queryDto.stockRange[0] &&
+                producto.stock <= queryDto.stockRange[1]));
 
-          // Filtra por stock:
-          if (queryDto.stock) {
-            if (record.bins.stock === queryDto.stock) {
-              productos.push(record.bins);
-            }
+          if (cumpleFiltros) {
+            productos.set(producto.id, producto); // Agrega al Map evitando duplicados
           }
         });
 
         stream.on('end', () => {
+          const resultado = Array.from(productos.values());
           this.logger.log(
-            `🔍 Se encontraron ${productos.length} producto(s) con el criterio de búsqueda seleccionado`,
+            `🔍 Se encontraron ${resultado.length} producto(s) con el criterio de búsqueda seleccionado`,
           );
           resolve({
             success: true,
-            message: `🔍 Se encontraron ${productos.length} producto(s) con el criterio de búsqueda seleccionado`,
-            data: [
-              ...new Map(productos.map((item) => [item.id, item])).values(),
-            ],
+            message: `${resultado.length} producto(s) encontrado(s)`,
+            data: resultado,
           });
         });
+
         stream.on('error', (error) => {
           this.logger.error(`Error al obtener los datos: ${error.message}`);
           reject(error);

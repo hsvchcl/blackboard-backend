@@ -84,16 +84,24 @@ test/
 
    ```env
    PORT=3010
+   AEROSPIKE_DB_HOST=127.0.0.1:3000
    ```
 
 4. 🔴 Iniciar el servicio de Aerospike via docker (PASO IMPORTANTE)
+
    ```bash
    docker run -d --name aerospike -p 3000-3002:3000-3002 aerospike/aerospike-server
    ```
 
 5. Iniciar servidor de desarrollo:
+
    ```bash
    npm run start:dev
+   ```
+
+6. Documentacion de la API (swagger)
+   ```bash
+   http://localhost:3010/api/docs
    ```
 
 ## 📌 Scripts Disponibles
