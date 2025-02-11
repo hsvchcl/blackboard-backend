@@ -86,7 +86,12 @@ test/
    PORT=3010
    ```
 
-4. Iniciar servidor de desarrollo:
+4. 🔴 Iniciar el servicio de Aerospike via docker (PASO IMPORTANTE)
+   ```bash
+   docker run -d --name aerospike -p 3000-3002:3000-3002 aerospike/aerospike-server
+   ```
+
+5. Iniciar servidor de desarrollo:
    ```bash
    npm run start:dev
    ```
