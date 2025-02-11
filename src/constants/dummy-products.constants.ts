@@ -83,7 +83,7 @@ export const DUMMY_PRODUCTS: CreateProductDto[] = [
   },
   {
     id: 10,
-    name: 'Cámara Web 4K',
+    name: 'Camara Web 4K',
     stock: 9,
     price: 14990,
     category: 'Webcams',
